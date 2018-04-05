@@ -5,7 +5,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from types import *
 
 import unittest, time, re, os, getpass, sys
 
@@ -26,7 +25,7 @@ def login(driver, username, password):
 
 	driver.find_element_by_xpath("//*[@id=\"submit\"]").click()
 
-def navigate_to_enrollment(driver, semester):
+def navigate_to_enrollment(driver):
 	#Go to Student Center
 	driver.find_element_by_link_text("Student Center").click()
 
@@ -34,7 +33,9 @@ def navigate_to_enrollment(driver, semester):
 	driver.get("https://hrsa.cunyfirst.cuny.edu/psc/cnyhcprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL?FolderPath=PORTAL_ROOT_OBJECT.HC_SSS_STUDENT_CENTER&IsFolder=false&IgnoreParamTempl=FolderPath%2cIsFolder/psp/cnyepprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL?FolderPath=PORTAL_ROOT_OBJECT.HC_SSS_STUDENT_CENTER&IsFolder=false&IgnoreParamTempl=FolderPath%2cIsFolder&PortalActualURL=https%3a%2f%2fhrsa.cunyfirst.cuny.edu%2fpsc%2fcnyhcprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL%3f%26IsFolder%3dfalse%26IgnoreParamTempl%3dFolderPath%252cIsFolder&PortalContentURL=https%3a%2f%2fhrsa.cunyfirst.cuny.edu%2fpsc%2fcnyhcprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL&PortalContentProvider=HRMS&PortalCRefLabel=Student%20Center&PortalRegistryName=EMPLOYEE&PortalServletURI=https%3a%2f%2fhome.cunyfirst.cuny.edu%2fpsp%2fcnyepprd%2f&PortalURI=https%3a%2f%2fhome.cunyfirst.cuny.edu%2fpsc%2fcnyepprd%2f&PortalHostNode=EMPL&NoCrumbs=yes&PortalKeyStruct=yes")
 	driver.find_element_by_link_text("Enroll").click()
 
-	element = WebDriverWait(driver, 10).until(
+def choose_semester(driver, semester):
+
+	WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, "win0divSSR_DUMMY_RECV1$0"))
     )
 
@@ -47,12 +48,12 @@ def navigate_to_enrollment(driver, semester):
 
 
 	table = driver.find_element_by_xpath("//*[@id=\"SSR_DUMMY_RECV1$scroll$0\"]")
+	# sem_row = "./*/tr[contains(., " + "\"" + sem[semester] + "\"" + ")]"
+
 	radio_button = table.find_element_by_xpath("./*/tr[contains(., " + "\"" + sem[semester] + "\"" + ")]//input[@type= 'radio']")
 	radio_button.click()
 
 	driver.find_element_by_link_text('Continue').click()
-
-
 
 
 def spam_swap(driver, base_url):
@@ -118,22 +119,23 @@ def get_choice():
 	print("========================================")
 
 	selection = input("Wut do?: ")
-	while not selection.isdigit() or int(selection) not in range(1, 3):
+	while not selection.isdigit() or int(selection) not in range(1, 4):
 		selection = input("please choose from the menu: ")
 
 	clear()
 	return int(selection)
 
 def cart_is_empty(driver):
-	message_window = WebDriverWait(driver, 10).until(
+	WebDriverWait(driver, 10).until(
         	EC.presence_of_element_located((By.ID, "win0divSSR_REGFORM_VW$0"))
     )
-	if (re.search(r"empty", driver.page_source)):
+
+	if EC.presence_of_element_located((By.ID, "win0divP_NO_CLASSES$0")):
 		return True
 	else:
 		return False
 
-def choose_semester():
+def get_semester():
 	print("========================================")
 	print("Which semester are you enrolling for?")
 	print("========================================")
@@ -143,22 +145,22 @@ def choose_semester():
 	while not semester.isdigit() or int(semester) not in range(1, 5):
 		semester = input("Semester: ")
 
-	
-
 	return int(semester)
 
 def run(cwd):
 	username = input("Username: ") + "@login.cuny.edu"
 	password = getpass.getpass("Password: ")
 
-
 	#print main menu and ask wether user wants to swap or enroll
 	user_choice = get_choice()
+	if user_choice == 3:
+		sys.exit(0)
+
 	clear()
 
 	# ask user what semester they wish to enroll/swap in
 	# give numerical choice for now to avoid user autism
-	semster = choose_semester()
+	semester = get_semester()
 
 	# ask user if for the delay between trying to enroll/swap
 	delay = input("Time delay between enrolling/swapping(in seconds): ")
@@ -173,20 +175,21 @@ def run(cwd):
 	del password
 	clear()
 
-	navigate_to_enrollment(driver, semester)
+	navigate_to_enrollment(driver)
+
+	choose_semester(driver, semester)
 
 	if cart_is_empty(driver):
-		print("your cart is empty.")
-		clear()
-		user_choice = get_choice()
+		print("Your cart is empty.")
+		print("Make sure you have classes in your cart and run this again.")
+		print("Press any key to exit.")
+		sys.exit(bool(input("")))	# i don't give care what your input is just press any button
 
 	# enroll until she can't enroll no more
 	if user_choice == 1:
 		spam_add(driver, int(delay))
 	elif user_choice == 2:
 		spam_swap(driver, int(delay))
-	elif user_choice == 3:
-		sys.exit(0)
 
 	time.sleep(600)
 
