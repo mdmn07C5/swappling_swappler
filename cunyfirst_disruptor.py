@@ -146,15 +146,15 @@ def get_choice():
 	print("========================================")
 	print("Menu")
 	print("========================================")
-	print("[1] enrofling enrofler")
-	print("[2] swappling swappler")
-	print("[3] exit")
-	# print("[4] report a bug")
-	# print("[5] buy this man a coffee!")
+	print("[1] Enroll")
+	print("[2] Swap")
+	print("[3] Exit")
+	print("[4] Report Bug")
+	print("[5] Buy this man a coffee!")
 	print("========================================")
 
 	selection = input("Wut do?: ")
-	while not selection.isdigit() or int(selection) not in range(1, 4):
+	while not selection.isdigit() or int(selection) not in range(1, 6):
 		selection = input("please choose from the menu: ")
 
 	clear()
@@ -192,54 +192,68 @@ def swap_opt():
 
 
 def run(cwd):
-	username = input("Username: ") + "@login.cuny.edu"
-	password = getpass.getpass("Password: ")
-	clear()
 
 	#print main menu and ask wether user wants to swap or enroll
 	user_choice = get_choice()
-	if user_choice == 3:
-		sys.exit(0)
-
 	clear()
 
-	# ask user what semester they wish to enroll/swap in
-	# give numerical choice for now to avoid user autism
-	semester = get_semester()
+	while user_choice != 3:
+		if user_choice == 4:
+			print("https://github.com/mdmn07C5/swappling_swappler/issues")
+			if bool(input("")+' '):
+				user_choice = get_choice()
 
-	# ask user if for the delay between trying to enroll/swap
-	delay = input("Time delay between enrolling/swapping(in seconds): ")
-	while not delay.isdigit():
-		delay = input("Please input delay in seconds: ")
+		elif user_choice == 5:
+			print("paypal.me/MalicdanMathew")
+			print("thanks for the coffee :>")
+			if bool(input("")+' '):
+				user_choice = get_choice()
 
-	# assuming the driver is in the same directory, run the chrome webdriver
-	driver = webdriver.Chrome(cwd + "\\chromedriver.exe")
+		else:		
+			# ask user what semester they wish to enroll/swap in
+			# give numerical choice for now to avoid user autism
+			semester = get_semester()
+			clear()
 
-	try:
-		login(driver, username, password)
-		del username, password
-		clear()
-	except:
-		print("Something went wrong. Either our credentials are wrong")
 
-	navigate_to_enrollment(driver)
+			# ask user if for the delay between trying to enroll/swap
+			delay = input("Time delay between enrolling/swapping(in seconds): ")
+			while not delay.isdigit():
+				delay = input("Please input delay in seconds: ")
 
-	choose_semester(driver, semester)
+			clear()
+			username = input("Username: ") + "@login.cuny.edu"
+			password = getpass.getpass("Password: ")
+			clear()
 
-	if cart_is_empty(driver):
-		print("Your cart is empty.")
-		print("Make sure you have classes in your cart and run this again.")
-		print("Press Enter to exit.")
-		sys.exit(bool(input("")))	# i don't give care what your input is just press any button
+			# assuming the driver is in the same directory, run the chrome webdriver
+			driver = webdriver.Chrome(cwd + "\\chromedriver.exe")
 
-	# enroll until she can't enroll no more
-	if user_choice == 1:
-		spam_add(driver, int(delay))
-	elif user_choice == 2:
-		class_in_sched, class_in_cart = swap_opt()
-		spam_swap(driver, int(delay), class_in_sched, class_in_cart)
+			try:
+				login(driver, username, password)
+				del username, password
+				clear()
+			except:
+				print("Something went wrong. Either your credentials are wrong")
 
-	time.sleep(600)
+			navigate_to_enrollment(driver)
+
+			choose_semester(driver, semester)
+
+			if cart_is_empty(driver):
+				print("Your cart is empty.")
+				print("Make sure you have classes in your cart and run this again.")
+				print("Press Enter to exit.")
+				sys.exit(bool(input("")))	# i don't give care what your input is just press any button
+
+			# enroll until she can't enroll no more
+			if user_choice == 1:
+				spam_add(driver, int(delay))
+			elif user_choice == 2:
+				class_in_sched, class_in_cart = swap_opt()
+				spam_swap(driver, int(delay), class_in_sched, class_in_cart)
+
+	sys.exit(0)
 
 def clear():
 	os.system('cls' if os.name == 'nt' else 'clear')
@@ -247,5 +261,4 @@ def clear():
 
 if __name__ == '__main__':
 		cwd = os.getcwd()
-		clear()
 		run(cwd)
