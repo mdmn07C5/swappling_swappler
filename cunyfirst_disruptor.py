@@ -46,12 +46,15 @@ def choose_semester(driver, semester):
 			4: "Summer"
 	}
 
-
-	table = driver.find_element_by_xpath("//*[@id=\"SSR_DUMMY_RECV1$scroll$0\"]")
-	# sem_row = "./*/tr[contains(., " + "\"" + sem[semester] + "\"" + ")]"
-
-	radio_button = table.find_element_by_xpath("./*/tr[contains(., " + "\"" + sem[semester] + "\"" + ")]//input[@type= 'radio']")
-	radio_button.click()
+	while True:
+		try:
+			table = driver.find_element_by_xpath("//*[@id=\"SSR_DUMMY_RECV1$scroll$0\"]")
+			radio_button = table.find_element_by_xpath("./*/tr[contains(., " + "\"" + sem[semester] + "\"" + ")]//input[@type= 'radio']")
+			radio_button.click()
+			break
+		except: 
+			print("Enrollment for that semester is not open.")
+			semester = get_semester()
 
 	driver.find_element_by_link_text('Continue').click()
 
@@ -130,10 +133,16 @@ def cart_is_empty(driver):
         	EC.presence_of_element_located((By.ID, "win0divSSR_REGFORM_VW$0"))
     )
 
-	if EC.presence_of_element_located((By.ID, "win0divP_NO_CLASSES$0")):
-		return True
-	else:
+	try:
+		driver.find_element_by_xpath("//*[@id=\"win0divP_NO_CLASSES$0\"]")
+	except:
 		return False
+	return True;
+
+	#if EC.presence_of_element_located((By.ID, "")):
+	#	return True
+	#else:
+	#	return False
 
 def get_semester():
 	print("========================================")
@@ -182,7 +191,7 @@ def run(cwd):
 	if cart_is_empty(driver):
 		print("Your cart is empty.")
 		print("Make sure you have classes in your cart and run this again.")
-		print("Press any key to exit.")
+		print("Press Enter to exit.")
 		sys.exit(bool(input("")))	# i don't give care what your input is just press any button
 
 	# enroll until she can't enroll no more
