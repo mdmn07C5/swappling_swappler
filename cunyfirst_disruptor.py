@@ -123,8 +123,10 @@ def spam_add(driver, delay):
 	get_error = True
 
 	while get_error:
+		#click ADD link
 		driver.find_element_by_link_text("add").click()
 
+		#click PROCEED FROM STEP 2 TO 3 button
 		driver.find_element_by_xpath(
 			"//*[@id=\"DERIVED_REGFRM1_LINK_ADD_ENRL$82$\"]"
 		).click()
@@ -261,4 +263,7 @@ def clear():
 
 if __name__ == '__main__':
 		cwd = os.getcwd()
+		if not os.path.isfile(cwd + "\\chromedriver.exe"):
+			print("Please make sure that chromedriver.exe is in the same directory.")
+			sys.exit(0)
 		run(cwd)
