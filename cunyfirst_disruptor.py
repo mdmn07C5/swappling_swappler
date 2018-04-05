@@ -10,7 +10,9 @@ import unittest, time, re, os, getpass, sys
 
 def login(driver, username, password):
 	# login_url = "https://ssologin.cuny.edu/cuny.html"
-	login_url = "https://home.cunyfirst.cuny.edu/psp/cnyepprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL?FolderPath=PORTAL_ROOT_OBJECT.HC_SSS_STUDENT_CENTER&IsFolder=false&IgnoreParamTempl=FolderPath%2cIsFolder"	
+	login_url = "https://home.cunyfirst.cuny.edu/psp/cnyepprd/EMPLOYEE/HRMS/c/"\
+		"SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL?FolderPath=PORTAL_ROOT_OBJECT"\
+		".HC_SSS_STUDENT_CENTER&IsFolder=false&IgnoreParamTempl=FolderPath%2cIsFolder"	
 
 	driver.get(login_url)
 
@@ -30,7 +32,20 @@ def navigate_to_enrollment(driver):
 	driver.find_element_by_link_text("Student Center").click()
 
 	# monstrosity, temporary while we figure out cunyfirst's seekrits
-	driver.get("https://hrsa.cunyfirst.cuny.edu/psc/cnyhcprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL?FolderPath=PORTAL_ROOT_OBJECT.HC_SSS_STUDENT_CENTER&IsFolder=false&IgnoreParamTempl=FolderPath%2cIsFolder/psp/cnyepprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL?FolderPath=PORTAL_ROOT_OBJECT.HC_SSS_STUDENT_CENTER&IsFolder=false&IgnoreParamTempl=FolderPath%2cIsFolder&PortalActualURL=https%3a%2f%2fhrsa.cunyfirst.cuny.edu%2fpsc%2fcnyhcprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL%3f%26IsFolder%3dfalse%26IgnoreParamTempl%3dFolderPath%252cIsFolder&PortalContentURL=https%3a%2f%2fhrsa.cunyfirst.cuny.edu%2fpsc%2fcnyhcprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL&PortalContentProvider=HRMS&PortalCRefLabel=Student%20Center&PortalRegistryName=EMPLOYEE&PortalServletURI=https%3a%2f%2fhome.cunyfirst.cuny.edu%2fpsp%2fcnyepprd%2f&PortalURI=https%3a%2f%2fhome.cunyfirst.cuny.edu%2fpsc%2fcnyepprd%2f&PortalHostNode=EMPL&NoCrumbs=yes&PortalKeyStruct=yes")
+	driver.get("https://hrsa.cunyfirst.cuny.edu/psc/cnyhcprd/EMPLOYEE/HRMS/c/"\
+		"SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL?FolderPath=PORTAL_ROOT_OBJECT"\
+		".HC_SSS_STUDENT_CENTER&IsFolder=false&IgnoreParamTempl=FolderPath%2cIsFolder"\
+		"/psp/cnyepprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL?"\
+		"FolderPath=PORTAL_ROOT_OBJECT.HC_SSS_STUDENT_CENTER&IsFolder=false&IgnoreParamTempl"\
+		"=FolderPath%2cIsFolder&PortalActualURL=https%3a%2f%2fhrsa.cunyfirst.cuny.edu"\
+		"%2fpsc%2fcnyhcprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL"\
+		"%3f%26IsFolder%3dfalse%26IgnoreParamTempl%3dFolderPath%252cIsFolder&PortalContentURL"\
+		"=https%3a%2f%2fhrsa.cunyfirst.cuny.edu%2fpsc%2fcnyhcprd%2fEMPLOYEE%2fHRMS%2fc%2f"\
+		"SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL&PortalContentProvider=HRMS&PortalCRefLabel"\
+		"=Student%20Center&PortalRegistryName=EMPLOYEE&PortalServletURI=https%3a%2f%2f"\
+		"home.cunyfirst.cuny.edu%2fpsp%2fcnyepprd%2f&PortalURI=https%3a%2f%2f"\
+		"home.cunyfirst.cuny.edu%2fpsc%2fcnyepprd%2f&PortalHostNode=EMPL&NoCrumbs"\
+		"=yes&PortalKeyStruct=yes")
 	driver.find_element_by_link_text("Enroll").click()
 
 def choose_semester(driver, semester):
@@ -49,45 +64,59 @@ def choose_semester(driver, semester):
 	while True:
 		try:
 			table = driver.find_element_by_xpath("//*[@id=\"SSR_DUMMY_RECV1$scroll$0\"]")
-			radio_button = table.find_element_by_xpath("./*/tr[contains(., " + "\"" + sem[semester] + "\"" + ")]//input[@type= 'radio']")
+			radio_button = table.find_element_by_xpath(
+				"./*/tr[contains(., " + "\"" + sem[semester] 
+				+ "\"" + ")]//input[@type= 'radio']"
+			)
 			radio_button.click()
 			break
 		except: 
 			print("Enrollment for that semester is not open.")
 			semester = get_semester()
+			clear()
 
 	driver.find_element_by_link_text('Continue').click()
 
 
-def spam_swap(driver, base_url):
+def spam_swap(driver, delay, class_in_sched, class_in_cart):
 	
 	get_error = True
 
 	while get_error:
-		swap_button = driver.find_element_by_link_text("swap")		
-		swap_button.click()
-
-		select_button = driver.find_element_by_xpath("//*[@id=\"DERIVED_REGFRM1_SSR_PB_ADDTOLIST1$184$\"]")
+		#click SWAP link
+		driver.find_element_by_link_text("swap").click()
 
 		#Swap this Class: Select from your schedule
-		class_from_sched = driver.find_element_by_xpath("//*[@id=\"DERIVED_REGFRM1_DESCR50$225$\"]")
+		class_from_sched = driver.find_element_by_xpath(
+			"//*[@id=\"DERIVED_REGFRM1_DESCR50$225$\"]"
+		)
 		#with this Class: Select form Shopping Cart
-		class_from_cart = driver.find_element_by_xpath("//*[@id=\"DERIVED_REGFRM1_SSR_CLASSNAME_35$183$\"]")
+		class_from_cart = driver.find_element_by_xpath(
+			"//*[@id=\"DERIVED_REGFRM1_SSR_CLASSNAME_35$183$\"]"
+		)
 
-		Select(class_from_sched).select_by_value("8172")
-		Select(class_from_cart).select_by_value("8170")
+		Select(class_from_sched).select_by_value(class_in_sched)
+		Select(class_from_cart).select_by_value(class_in_cart)
 
-		select_button.click()
+		#click SELECT button
+		driver.find_element_by_xpath(
+			"//*[@id=\"DERIVED_REGFRM1_SSR_PB_ADDTOLIST1$184$\"]"
+		).click()
 
-		finish_swapping_button = driver.find_element_by_xpath("//*[@id=\"DERIVED_REGFRM1_SSR_PB_SUBMIT\"]")
+		finish_swapping_button = WebDriverWait(driver, 10).until(
+			EC.presence_of_element_located((By.ID, "DERIVED_REGFRM1_SSR_PB_SUBMIT"))
+		)
 		finish_swapping_button.click()
 
-		message_window = driver.find_element_by_id("win0divDERIVED_REGFRM1_SS_MESSAGE_LONG$0")
+		message_window = WebDriverWait(driver, 10).until(
+        	EC.presence_of_element_located((By.ID, "win0divDERIVED_REGFRM1_SS_MESSAGE_LONG$0"))
+		)
 		if (re.search(r"Error", str(message_window))):
-			get_error = false
+			get_error = False
 
-		driver.find_element_by_link_text("Enroll").click()	
+		driver.find_element_by_link_text("Enroll").click()
 
+		time.sleep(delay)
 
 def spam_add(driver, delay):
 
@@ -96,7 +125,9 @@ def spam_add(driver, delay):
 	while get_error:
 		driver.find_element_by_link_text("add").click()
 
-		driver.find_element_by_xpath("//*[@id=\"DERIVED_REGFRM1_LINK_ADD_ENRL$82$\"]").click()
+		driver.find_element_by_xpath(
+			"//*[@id=\"DERIVED_REGFRM1_LINK_ADD_ENRL$82$\"]"
+		).click()
 
 		finish_enroll_button = WebDriverWait(driver, 10).until(
         	EC.presence_of_element_located((By.ID, "DERIVED_REGFRM1_SSR_PB_SUBMIT"))
@@ -118,7 +149,8 @@ def get_choice():
 	print("[1] enrofling enrofler")
 	print("[2] swappling swappler")
 	print("[3] exit")
-	# print("\t[4] Buy this man a coffee!")
+	# print("[4] report a bug")
+	# print("[5] buy this man a coffee!")
 	print("========================================")
 
 	selection = input("Wut do?: ")
@@ -139,11 +171,6 @@ def cart_is_empty(driver):
 		return False
 	return True;
 
-	#if EC.presence_of_element_located((By.ID, "")):
-	#	return True
-	#else:
-	#	return False
-
 def get_semester():
 	print("========================================")
 	print("Which semester are you enrolling for?")
@@ -156,9 +183,18 @@ def get_semester():
 
 	return int(semester)
 
+def swap_opt():
+	print("Which class to swap out of?")
+	class_in_sched = input("Class Number: ")
+	print("Which class to swap in to?")
+	class_in_cart = input("Class Number: ")
+	return class_in_sched, class_in_cart
+
+
 def run(cwd):
 	username = input("Username: ") + "@login.cuny.edu"
 	password = getpass.getpass("Password: ")
+	clear()
 
 	#print main menu and ask wether user wants to swap or enroll
 	user_choice = get_choice()
@@ -179,10 +215,12 @@ def run(cwd):
 	# assuming the driver is in the same directory, run the chrome webdriver
 	driver = webdriver.Chrome(cwd + "\\chromedriver.exe")
 
-	login(driver, username, password)
-	del username
-	del password
-	clear()
+	try:
+		login(driver, username, password)
+		del username, password
+		clear()
+	except:
+		print("Something went wrong. Either our credentials are wrong")
 
 	navigate_to_enrollment(driver)
 
@@ -198,7 +236,8 @@ def run(cwd):
 	if user_choice == 1:
 		spam_add(driver, int(delay))
 	elif user_choice == 2:
-		spam_swap(driver, int(delay))
+		class_in_sched, class_in_cart = swap_opt()
+		spam_swap(driver, int(delay), class_in_sched, class_in_cart)
 
 	time.sleep(600)
 
