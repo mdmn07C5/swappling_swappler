@@ -83,9 +83,11 @@ def choose_semester(driver, semester):
 	driver.find_element_by_link_text('Continue').click()
 
 
-def spam_swap(driver, delay, class_pair):
+def spam_swap(driver, delay):
 	
 	get_error = True
+
+	class_in_sched, class_in_cart = swap_opt()
 
 	while get_error:
 		#click SWAP link
@@ -96,13 +98,10 @@ def spam_swap(driver, delay, class_pair):
 			EC.presence_of_element_located((By.ID, "DERIVED_REGFRM1_DESCR50$225$"))
 		)
 
-		#with this Class: Select form Shopping Cart
+		#with this Class: Select from Shopping Cart
 		class_from_cart = WebDriverWait(driver, 10).until(
 			EC.presence_of_element_located((By.ID, "DERIVED_REGFRM1_SSR_CLASSNAME_35$183$"))
 		)
-
-		class_in_sched = class_pair[0]
-		class_in_cart = class_pair[1]
 
 		Select(class_from_sched).select_by_value(class_in_sched)
 		Select(class_from_cart).select_by_value(class_in_cart)
@@ -157,7 +156,7 @@ def spam_add(driver, delay):
 
 		time.sleep(delay)
 
-def get_choice():
+def print_menu():
 	print("========================================")
 	print("Menu")
 	print("========================================")
@@ -166,10 +165,15 @@ def get_choice():
 	print("[3] Exit")
 	print("[4] Report Bug")
 	print("[5] Buy this man a coffee!")
-	print("========================================")
+	print("========================================")	
+
+def get_choice():
+	print_menu()
 
 	selection = input("Wut do?: ")
 	while not selection.isdigit() or int(selection) not in range(1, 6):
+		clear()
+		print_menu()
 		selection = input("please choose from the menu: ")
 
 	clear()
@@ -186,14 +190,20 @@ def cart_is_empty(driver):
 		return False
 	return True;
 
-def get_semester():
+def print_semester_menu():
 	print("========================================")
 	print("Which semester are you enrolling for?")
 	print("========================================")
 	print("[1]Fall Semester\n[2]Winter Semester\n[3]Spring Semester\n[4]Summer Semester")
-	print("========================================")
-	semester = ""
+	print("========================================")	
+
+def get_semester():
+	print_semester_menu()
+
+	semester = input("Semester: ")
 	while not semester.isdigit() or int(semester) not in range(1, 5):
+		clear()
+		print_semester_menu()
 		semester = input("Semester: ")
 
 	return int(semester)
@@ -206,25 +216,28 @@ def swap_opt():
 	return class_in_sched, class_in_cart
 
 
-def busy_loop(driver, method):
+def busy_loop(driver, method, delay):
 	driver.set_page_load_timeout(30)
 
 	while True:
 		try:
-			method()
+			method(driver, delay)
 			break
 		except WebDriverException as EX:
 			print('[' + time.ctime() + '] Something went wrong.')
 			print(EX)
 
-def select(*cwd):
+def select():
+	clear()
 	user_choice = get_choice()
 	clear()
 
+	# driver_path = resolve_path(cwd)
+
 	def run_enroller():
-		run(resolve_path(cwd), 0)
+		run(spam_add)
 	def run_swapper():
-		run(resolve_path(cwd), 1)
+		run(spam_enroll)
 	def close():
 		sys.exit(bool(input('')))
 	def report_bug():
@@ -245,17 +258,14 @@ def select(*cwd):
 	sys.exit(0)
 
 def resolve_path(cwd):
-	return cwd[0] + '\\chromedriver' + ('.exe' if os.name == 'nt' else '')
+	return cwd + '\\chromedriver' + ('.exe' if os.name == 'nt' else '')
 
-
-	#return str(cwd).join('\\chromedriver.exe')# .join('.exe' if os.name == 'nt' else '')
-
-
-def run(path, enroll_or_swap):
+def run(method):
 	semester = get_semester()
 	delay = get_delay()
 	usr_pwrd = get_login()
 
+	path = resolve_path(os.getcwd())
 	driver = webdriver.Chrome(str(path))
 
 	login(driver, usr_pwrd)
@@ -265,10 +275,7 @@ def run(path, enroll_or_swap):
 
 	choose_semester(driver, semester)
 
-	if enroll_or_swap == 0:
-		busy_loop(driver, spam_add(driver, delay))
-	elif enroll_or_swap == 1:
-		busy_loop(driver, spam_swap(driver, delay, swap_opt()))
+	busy_loop(driver, method, delay)
 
 def print_github_link():
 	print("https://github.com/mdmn07C5/swappling_swappler/issues")
@@ -281,19 +288,6 @@ def shameless_begging():
 	print("thanks for the coffee :>")
 	bool(input('hit Enter to return') + ' ')
 	select()
-
-def get_semester():
-	print("========================================")
-	print("Which semester are you enrolling for?")
-	print("========================================")
-	print("[1]Fall Semester\n[2]Winter Semester\n[3]Spring Semester\n[4]Summer Semester")
-	print("========================================")
-	semester = ""
-
-	while not semester.isdigit() or int(semester) not in range(1, 5):
-		semester = input("Semester: ")
-
-	return int(semester)
 
 def get_delay():
 	delay = input("Time delay between enrolling/swapping(in seconds): ")
@@ -311,10 +305,9 @@ def get_login():
 def clear():
 	os.system('cls' if os.name == 'nt' else 'clear')
 
-
 if __name__ == '__main__':
 		cwd = os.getcwd()
-		if not os.path.isfile(cwd + "\\chromedriver.exe"):
+		if not os.path.isfile(cwd + '\\chromedriver' + ('.exe' if os.name == 'nt' else '')):
 			print("Please make sure that chromedriver.exe is in the same directory.")
 			sys.exit(0)
-		select(cwd)
+		select()
